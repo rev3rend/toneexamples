@@ -1,0 +1,78 @@
+<html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.5/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.5/addons/p5.dom.js"></script>
+	<script type="text/javascript" src="http://cdn.tonejs.org/latest/Tone.min.js"></script>
+	<script src="./teoria/teoria.js"></script>
+	<script>
+
+	var synth;
+	var note1, note2, note3;
+
+	function setup()
+	{
+		// graphics stuff:
+		createCanvas(400, 400);
+		//create one of Tone's built-in synthesizers and connect it to the master output
+		synth = new Tone.PolySynth(32, Tone.SimpleSynth).toMaster();
+		Tone.Transport.start();
+
+	}
+
+	function draw()
+	{
+		ellipse(mouseX, mouseY, 20, 20);
+	}
+
+	function doList()
+	{
+
+	}
+
+	function keyPressed()
+	{
+		background(255);
+
+	}
+
+	function mousePressed()
+	{
+		var midi = Math.floor(map(mouseY, 0, height-1, 100, 60));
+		// minor chord from hell!!!! :
+		//note1 = teoria.note('a4');
+		note1 = teoria.note.fromMIDI(midi);
+		note2 = note1.interval('m3'); // minor third
+		note3 = note1.interval('P5'); // perfect fifth
+
+		arpeggio([note1.fq(), note2.fq(), note3.fq()], 0.1);
+
+	}
+
+	function arpeggio(n, d)
+	{
+		for(var i = 0;i<n.length;i++)
+		{
+			schedulenote(d*i, d, random(0.5, 1), n[i]);
+		}
+	}
+
+	function schedulenote(_t, _d, _v, _n) // when, how long, how loud, what? (MUSIC-N)
+	{
+			Tone.Transport.setTimeout(function(time){
+				console.log(_n);
+				synth.triggerAttackRelease(_n, _d, time, _v);
+			}, _t);
+	}
+
+	// assumes A440... this should exist as synth.midiToFrequency maybe.
+	function mtof(f)
+	{
+	    // midi -> frequency conversion
+		return (440. * Math.exp(.057762265 * (f - 69.)));
+	}
+
+</script>
+</head>
+<body>
+</body>
+</html>

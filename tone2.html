@@ -1,0 +1,82 @@
+<html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.5/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.5/addons/p5.dom.js"></script>
+	<script type="text/javascript" src="http://cdn.tonejs.org/latest/Tone.min.js"></script>
+	<script src="./teoria/teoria.js"></script>
+	<script>
+
+	var synth;
+	var note1, note2, note3;
+
+	function setup()
+	{
+		// graphics stuff:
+		createCanvas(400, 400);
+		//create one of Tone's built-in synthesizers and connect it to the master output
+		synth = new Tone.PolySynth(32, Tone.SimpleSynth).toMaster();
+		Tone.Transport.start();
+
+	}
+
+	function draw()
+	{
+		ellipse(mouseX, mouseY, 20, 20);
+	}
+
+	function doList()
+	{
+
+	}
+
+	function keyPressed()
+	{
+		background(255);
+
+	}
+
+	function mousePressed()
+	{
+		var midi = Math.floor(map(mouseY, 0, height-1, 100, 60));
+		// minor chord from hell!!!! :
+		//note1 = teoria.note('a4');
+		note1 = teoria.note.fromMIDI(midi);
+		note2 = note1.interval('m3'); // minor third
+		note3 = note1.interval('P5'); // perfect fifth
+		//var note1 = mtof(midi);
+		//var note2 = mtof(midi+3);
+		//var note3 = mtof(midi+7);
+
+		// play da notes for a whole note
+
+		Tone.Transport.setTimeout(function(time){
+			synth.triggerAttackRelease([note1.fq()*1, note2.fq()*1, note3.fq()*1], 1.0, time);
+		}, 0);
+
+		Tone.Transport.setTimeout(function(time){
+			synth.triggerAttackRelease([note1.fq()*2, note2.fq()*2, note3.fq()*2], 1.0, time);
+		}, 1);
+
+		Tone.Transport.setTimeout(function(time){
+			synth.triggerAttackRelease([note1.fq()*3, note2.fq()*3, note3.fq()*3], 1.0, time);
+		}, 2);
+	}
+
+	function arpeggio(n)
+	{
+
+
+	}
+
+	// assumes A440... this should exist as synth.midiToFrequency maybe.
+	function mtof(f)
+	{
+	    // midi -> frequency conversion
+		return (440. * Math.exp(.057762265 * (f - 69.)));
+	}
+
+</script>
+</head>
+<body>
+</body>
+</html>

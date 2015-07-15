@@ -1,0 +1,102 @@
+<html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.5/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.5/addons/p5.dom.js"></script>
+	<script type="text/javascript" src="http://cdn.tonejs.org/latest/Tone.min.js"></script>
+	<script>
+
+	var synth;
+	var note1, note2, note3;
+	var thefreqs = new Array(36);
+	var basepitch = 40;
+	var thescale = [0, 2, 3, 5, 7, 8, 10];
+	var grid = 0.3;
+
+	function setup()
+	{
+		// graphics stuff:
+		createCanvas(400, 400);
+		//create one of Tone's built-in synthesizers and connect it to the master output
+		synth = new Tone.PolySynth(32, Tone.FMSynth).toMaster();
+		synth.set({
+			modulationIndex: 4,
+			harmonicity: 0.25,
+			carrier: {
+				envelope: {
+					attack: 1.,
+					decay: 0.3,
+					sustain: 0.7,
+					release: 2.
+				}
+			}
+		});
+		Tone.Transport.start();
+
+		for(var i = 0;i<thefreqs.length;i++)
+		{
+			var octwrap = thescale.length;
+			var octave = Math.floor(i/octwrap)+1;
+			var newnote = basepitch + thescale[i%octwrap];
+			thefreqs[i] = mtof(newnote+(octave*12));
+			//console.log(thefreqs[i]);
+		}
+
+
+	}
+
+	function draw()
+	{
+		ellipse(mouseX, mouseY, 20, 20);
+	}
+
+	function doList()
+	{
+
+	}
+
+	function keyPressed()
+	{
+		background(255);
+
+	}
+
+	function mousePressed()
+	{
+		var whichnote = Math.floor(map(mouseY, height, 0, 0, thefreqs.length));
+		whichnote = constrain(whichnote, 0, thefreqs.length-1);
+		arpeggio(whichnote, 4, grid);
+
+	}
+
+	function arpeggio(n, s, d)
+	{
+		var now = Tone.context.currentTime;
+		var beatoffset = grid-(now % grid);
+		console.log(beatoffset);
+
+		for(var i = 0;i<s;i++)
+		{
+			var thenote = thefreqs[(i*2+n)%thefreqs.length];
+			schedulenote((d*i)+beatoffset, d*s+s, random(0.2, 0.5), thenote);
+		}
+	}
+
+	function schedulenote(_t, _d, _v, _n) // when, how long, how loud, what? (MUSIC-N)
+	{
+			Tone.Transport.setTimeout(function(time){
+				synth.triggerAttackRelease(_n, _d, time, _v);
+			}, _t);
+	}
+
+	// assumes A440... this should exist as synth.midiToFrequency maybe.
+	function mtof(f)
+	{
+	    // midi -> frequency conversion
+		return (440. * Math.exp(.057762265 * (f - 69.)));
+	}
+
+</script>
+</head>
+<body>
+</body>
+</html>
